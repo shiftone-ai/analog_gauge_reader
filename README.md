@@ -6,27 +6,60 @@
 
 This is the code for the paper [Under Pressure: Learning-Based Analog Gauge Reading In The Wild](https://arxiv.org/abs/2404.08785) by Maurits Reitsma, Julian Keller, Kenneth Blomqvist and Roland Siegwart. 
 
-## Setup installation (Poetry, automatic)
+## Setup installation (Nix + uv, recommended)
 
-Install Poetry
-
-```shell
-curl -sSL https://install.python-poetry.org | python3 -
-```
-
-Install the project dependencies
+The toolchain (uv, git-lfs, ninja) comes from a Nix flake; Python itself and all
+Python packages are managed by [uv](https://docs.astral.sh/uv/).
 
 ```shell
-poetry install
+nix develop                          # or: direnv allow  (the repo ships an .envrc)
+uv sync                              # creates .venv with Python 3.11 and all dependencies
+git lfs install --local              # once per clone
+git lfs pull --include="models/*"    # fetch the YOLO / key point checkpoints
 ```
 
-Enter Poetry shell
+Then run anything through `uv run`:
 
 ```shell
-poetry shell
+uv run python pipeline.py --help
 ```
 
-## Setup installation (manual)
+Notes:
+
+* `git-lfs` is provided by the dev shell, so run git commands for this repo from
+  inside it (`direnv allow` makes that automatic). Outside the shell git cannot
+  find the LFS filter that `git lfs install --local` configured.
+* The version ceiling of the whole stack is set by a chain of runtime asserts:
+  mmocr 1.0.1 requires mmdet < 3.2.0, which requires mmcv < 2.1.0. mmcv 2.0.x
+  links against `at::mps::MPSStream::commit`, a symbol that torch dropped after
+  2.0.x, so its `_ext` module fails to load on any newer torch on macOS. torch
+  2.0.x in turn has no wheels beyond CPython 3.11, which is why Python is pinned
+  to 3.11 in `.python-version`. Everything not tied to that chain (ultralytics,
+  scikit-learn, scipy, opencv, mmengine) is on a current release.
+* `mmcv` has no macOS wheels, so `uv sync` compiles it from source on the first
+  run (a few minutes). The build configuration lives in `[tool.uv.extra-build-*]`
+  in `pyproject.toml`; it injects torch into the build environment and disables
+  clang's `-Winvalid-specialization`, which torch 2.0.x's headers trip over on
+  Apple clang 21+.
+* The OCR checkpoints under `dependencies/` are not needed: mmocr downloads its
+  own weights on first use. `dependencies/mmcv-*.whl` is the Linux x86-64 wheel
+  used by the original setup and is unused here.
+* On Apple Silicon, `uv` reinstalls torch on every sync. The macOS arm64 wheels
+  of torch 2.0.x declare `macosx_11_0_x86_64` in their metadata even though the
+  binaries are arm64, so uv considers the installed copy mismatched. It is
+  harmless; use `uv run --no-sync` to skip it.
+
+### Without Nix
+
+uv alone is enough, as long as `ninja` and a C++ toolchain (Xcode command line
+tools on macOS) are available for the mmcv build:
+
+```shell
+curl -LsSf https://astral.sh/uv/install.sh | sh
+uv sync
+```
+
+## Setup installation (manual, conda)
 
 To setup the conda environment to run all scripts follow the following instruction:
 
