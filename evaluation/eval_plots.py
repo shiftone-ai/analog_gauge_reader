@@ -7,6 +7,7 @@ matplotlib.use('Agg')
 
 
 class EvalPlotter:
+
     def __init__(self, run_path, image):
         self.run_path = run_path
         self.image = image

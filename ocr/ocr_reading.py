@@ -1,9 +1,12 @@
 import numpy as np
 
-UNIT_LIST = ["bar", "mbar", "millibars", "MPa", "psi", "C", "°C", "F", "°F", "%"]
+UNIT_LIST = [
+    "bar", "mbar", "millibars", "MPa", "psi", "C", "°C", "F", "°F", "%"
+]
 
 
 class OCRReading:
+
     def __init__(self, polygon, reading, confidence):
         self.polygon = polygon
         self.reading = reading.strip()

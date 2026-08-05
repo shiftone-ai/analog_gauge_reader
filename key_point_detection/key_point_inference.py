@@ -6,6 +6,7 @@ from key_point_detection.key_point_dataset import custom_transforms
 
 
 class KeyPointInference:
+
     def __init__(self, model_path):
 
         self.model = load_model(model_path)

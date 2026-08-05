@@ -11,6 +11,7 @@ DINO_CHANNELS = 384
 
 
 class Encoder(nn.Module):
+
     def __init__(self, pretrained=True):
         super().__init__()
         self.model = torch.hub.load('facebookresearch/dinov2',
@@ -20,7 +21,6 @@ class Encoder(nn.Module):
         for param in self.model.parameters():
             param.requires_grad = False
 
-    # pylint: disable=no-self-use
     def get_number_output_channels(self):
         return DINO_CHANNELS
 
@@ -36,6 +36,7 @@ class Encoder(nn.Module):
 
 
 class Decoder(nn.Module):
+
     def __init__(self, n_input_channels, n_inter_channels, out_size,
                  n_heatmaps):
         super().__init__()
@@ -54,6 +55,7 @@ class Decoder(nn.Module):
 
 
 class EncoderDecoder(nn.Module):
+
     def __init__(self, encoder, decoder):
         super().__init__()
         self.encoder = encoder

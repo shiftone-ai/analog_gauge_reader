@@ -1,15 +1,14 @@
 ## ! DO NOT MANUALLY INVOKE THIS setup.py, USE CATKIN INSTEAD
 
+# catkin's python_setup expects a distutils-based setup script.
+# pylint: disable=deprecated-module
 from distutils.core import setup
 from catkin_pkg.python_setup import generate_distutils_setup
 
 # fetch values from package.xml
 setup_args = generate_distutils_setup(
     packages=[],
-    scripts=[
-        'scripts/analog_gauge_reader_ros.sh'
-    ],
-    install_requires=[]
-)
+    scripts=['scripts/analog_gauge_reader_ros.sh'],
+    install_requires=[])
 
 setup(**setup_args)

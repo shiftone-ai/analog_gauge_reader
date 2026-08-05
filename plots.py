@@ -18,6 +18,7 @@ RUN_PATH = 'run'
 
 
 class Plotter:
+
     def __init__(self, run_path, image):
         self.run_path = run_path
         os.mkdir(self.run_path)
@@ -169,9 +170,11 @@ class Plotter:
                             c=color,
                             xytext=(10, 10),
                             textcoords='offset points',
-                            bbox=dict(facecolor='#ffffff',
-                                      alpha=0.5,
-                                      edgecolor='none'))
+                            bbox={
+                                'facecolor': '#ffffff',
+                                'alpha': 0.5,
+                                'edgecolor': 'none'
+                            })
 
         x, y = get_ellipse_pts(ellipse_params)
         plt.plot(x, y)  # plot ellipse
@@ -296,9 +299,11 @@ class Plotter:
                             c='#38761d',
                             xytext=(10, 10),
                             textcoords='offset points',
-                            bbox=dict(facecolor='#ffffff',
-                                      alpha=0.5,
-                                      edgecolor='none'))
+                            bbox={
+                                'facecolor': '#ffffff',
+                                'alpha': 0.5,
+                                'edgecolor': 'none'
+                            })
         plt.title(f"ocr results {title}")
         path = os.path.join(self.run_path, f"ocr_results_{title}.jpg")
         plt.savefig(path)

@@ -33,7 +33,11 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = ["pre-commit>=3.3.3,<4"]
+dev = [
+    "pre-commit>=3.3.3,<4",
+    "pylint>=4.0",
+    "yapf>=0.43",
+]
 
 [tool.uv]
 # setup.py は catkin (ROS) 専用で、この repo 自体は Python パッケージとして
