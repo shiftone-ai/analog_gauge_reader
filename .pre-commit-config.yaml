@@ -37,12 +37,12 @@ repos:
     hooks:
       - name: Format python files with yapf
         id: yapf
-        entry: uv run --frozen yapf --in-place
+        entry: uv run --no-sync yapf --in-place
         language: system
         types: [ python ]
       - name: Lint python files with pylint
         id: pylint
-        entry: uv run --frozen pylint --rcfile=.pylintrc
+        entry: uv run --no-sync pylint --rcfile=.pylintrc
         language: system
         types: [ python ]
 
