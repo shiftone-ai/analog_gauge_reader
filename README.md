@@ -142,6 +142,11 @@ Start a live preview with the default camera and model paths:
 uv run --no-sync python webcam_app.py
 ```
 
+Press C during the live preview, then press a digit from 0 through 9 to switch
+camera devices without restarting the app. The current device number is shown
+in the preview footer. If the selected device cannot be opened, the current
+camera stays active. Press Escape to cancel camera selection.
+
 Press Space to capture the displayed frame. After the pipeline finishes, the
 app shows the reading and its final visualization. Press Enter or C to confirm
 the automatic value, E to enter a corrected numeric value, or R to reject the
