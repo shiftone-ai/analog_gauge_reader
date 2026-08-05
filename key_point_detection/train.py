@@ -25,6 +25,7 @@ BATCH_SIZE = 8
 
 
 class KeyPointTrain:
+
     def __init__(self, base_path, debug):
 
         self.debug = debug

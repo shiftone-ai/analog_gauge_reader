@@ -39,7 +39,8 @@ def get_fitted_line(x_coords, y_coords):
     ordinal_distance_reg = odr.ODR(data, odr_model, beta0=[0.2, 1.], maxit=600)
     out = ordinal_distance_reg.run()
     line_coeffs = out.beta
-    residual_variance = out.res_var
+    # scipy.odr.Output sets its attributes dynamically.
+    residual_variance = out.res_var  # pylint: disable=no-member
     return line_coeffs, residual_variance
 
 

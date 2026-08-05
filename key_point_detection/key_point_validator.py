@@ -34,6 +34,7 @@ START_END_KEY = "start_end"
 
 
 class KeyPointVal:
+
     def __init__(self, model, base_path, time_str=None):
 
         self.time_str = time_str if time_str is not None else time.strftime(

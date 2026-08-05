@@ -82,7 +82,7 @@ profile_default/
 ipython_config.py
 
 # pyenv
-.python-version
+#   .python-version is tracked: uv reads it to pin the interpreter version.
 
 # pipenv
 #   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
@@ -131,6 +131,11 @@ dmypy.json
 # CLion
 **.idea
 **cmake-build-*
+
+# Nix / direnv
+.direnv/
+result
+result-*
 
 #Custom ignores
 yolov8?.pt

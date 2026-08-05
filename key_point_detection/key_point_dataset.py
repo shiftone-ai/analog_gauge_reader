@@ -24,6 +24,7 @@ KEY_POINT_PREFIX = "K_"
 
 
 class KeypointImageDataSet(Dataset):
+
     def __init__(self,
                  img_dir,
                  annotations_dir,

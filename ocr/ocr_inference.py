@@ -105,11 +105,17 @@ def ocr_warp(image, zero_point, ellipse_params, plotter, debug, multiple_rot,
         ocr_reading.set_polygon(np.array(new_polygon))
 
     if zero_point_rot or multiple_rot:
+        # rot_angle is assigned by exactly the branches this condition selects.
+        # pylint: disable-next=possibly-used-before-assignment
         return ocr_readings, ocr_visualization, rot_angle
     return ocr_readings, ocr_visualization
 
 
 def ocr_rotations(img, plotter, debug):
+    # The best_* variables are set on the first loop iteration, since
+    # number_of_numericals >= 0 > max_num_of_numericals, but pylint cannot
+    # prove that the loop body runs.
+    # pylint: disable=possibly-used-before-assignment
     degree_list = [0, 45, 90, 135, 180, 225, 270, 315]
 
     max_conf = -1

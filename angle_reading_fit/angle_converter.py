@@ -2,6 +2,7 @@ import numpy as np
 
 
 class AngleConverter:
+
     def __init__(self, theta_zero):
         self.theta_zero = theta_zero
 

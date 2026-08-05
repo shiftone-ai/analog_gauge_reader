@@ -105,8 +105,14 @@ def rescale_ellipse_resize(ellipse_params, original_resolution,
     return x0_new, y0_new, ap_x_new, bp_x_new, phi
 
 
-def process_image(image, detection_model_path, key_point_model_path,
-                  segmentation_model_path, run_path, debug, eval_mode, image_is_raw=False):
+def process_image(image,
+                  detection_model_path,
+                  key_point_model_path,
+                  segmentation_model_path,
+                  run_path,
+                  debug,
+                  eval_mode,
+                  image_is_raw=False):
 
     result = []
     errors = {}
@@ -219,14 +225,14 @@ def process_image(image, detection_model_path, key_point_model_path,
     coeffs = fit_ellipse(key_points[:, 0], key_points[:, 1])
     try:
         ellipse_params = cart_to_pol(coeffs)
-    except ValueError:
+    except ValueError as exc:
         logging.error("Ellipse parameters not an ellipse.")
         errors[constants.NOT_AN_ELLIPSE_ERROR_KEY] = True
         result.append({constants.READING_KEY: constants.FAILED})
         result_full[constants.OCR_NUM_KEY] = constants.FAILED
         result_full[constants.NEEDLE_MASK_KEY] = constants.FAILED
         write_files(result, result_full, errors, run_path, eval_mode)
-        raise Exception("Ellipse parameters not an ellipse")
+        raise Exception("Ellipse parameters not an ellipse") from exc
 
     ellipse_error = get_ellipse_error(key_points, ellipse_params)
     errors["Ellipse fit error"] = ellipse_error
@@ -319,6 +325,8 @@ def process_image(image, detection_model_path, key_point_model_path,
         reading.set_polygon(polygon)
 
     if debug:
+        # ocr_visualization is only produced on the debug paths above.
+        # pylint: disable-next=possibly-used-before-assignment
         plotter.plot_ocr_visualization(ocr_visualization)
         plotter.plot_ocr(ocr_readings, title='full')
 
@@ -390,13 +398,13 @@ def process_image(image, detection_model_path, key_point_model_path,
     try:
         needle_mask_x, needle_mask_y = segment_gauge_needle(
             cropped_resized_img, segmentation_model_path)
-    except AttributeError:
+    except AttributeError as exc:
         logging.error("Segmentation failed, no needle found")
         errors[constants.SEGMENTATION_FAILED_KEY] = True
         result.append({constants.READING_KEY: constants.FAILED})
         result_full[constants.NEEDLE_MASK_KEY] = constants.FAILED
         write_files(result, result_full, errors, run_path, eval_mode)
-        raise Exception("Segmentation failed, no needle found")
+        raise Exception("Segmentation failed, no needle found") from exc
 
     if eval_mode:
         result_full[constants.NEEDLE_MASK_KEY] = {

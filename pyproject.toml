@@ -1,30 +1,58 @@
-[tool.poetry]
+[project]
 name = "analog-gauge-reader"
 version = "0.1.0"
 description = "Analog gauge reader"
-authors = ["Maurits Reitsma", "Julian Keller", "Kenneth Blomqvist"]
-license = "MIT"
+authors = [
+    { name = "Maurits Reitsma" },
+    { name = "Julian Keller" },
+    { name = "Kenneth Blomqvist" },
+]
+# 版の天井は mmocr 1.0.1 -> mmdet <3.2.0 -> mmcv <2.1.0 の連鎖で決まる。
+# mmcv 2.0.x は torch 2.0.x の MPS ABI (at::mps::MPSStream::commit) に依存しており、
+# torch 2.1 以降では _ext のロードに失敗する。torch 2.0.x は Python 3.11 まで。
+requires-python = ">=3.11,<3.12"
 readme = "README.md"
+license = "MIT"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+]
+dependencies = [
+    "torch==2.0.1",
+    "torchvision==0.15.2",
+    "mmcv==2.0.1",
+    "mmengine==0.10.7",
+    "mmdet==3.1.0",
+    "mmocr==1.0.1",
+    "ultralytics>=8.4",
+    "scikit-learn>=1.5",
+    "numpy<2",
+    "opencv-python>=4.6",
+    "matplotlib>=3.7",
+    "scipy>=1.11",
+]
 
-[tool.poetry.dependencies]
-python = "^3.8"
-torch = "2.0.0"
-torchvision = "0.15.1"
-mmcv = {url = "https://download.openmmlab.com/mmcv/dist/cpu/torch2.0.0/mmcv-2.0.0-cp38-cp38-manylinux1_x86_64.whl"}
-mmengine = "0.7.2"
-mmdet = "3.0.0"
-mmocr = "1.0.0"
-ultralytics = "8.0.66"
-scikit-learn = "1.2.2"
+[dependency-groups]
+dev = [
+    "pre-commit>=3.3.3,<4",
+    "pylint>=4.0",
+    "yapf>=0.43",
+]
 
-[tool.poetry.group.dev.dependencies]
-pre-commit = "^3.3.3"
+[tool.uv]
+# setup.py は catkin (ROS) 専用で、この repo 自体は Python パッケージとして
+# ビルド/インストールしない。スクリプト群を動かすための環境だけを作る。
+package = false
+default-groups = "all"
 
-[[tool.poetry.source]]
-name = "mmcv"
-url = "https://download.openmmlab.com/mmcv/dist/cpu/torch2.0/index.html"
-priority = "explicit"
+# mmcv は PyPI に sdist しか無く (OpenMMLab の wheel は Linux/Windows のみ)、
+# ビルド時に torch のヘッダを必要とするため build 環境へ torch を注入する。
+# mmcv 2.0.1 は静的メタデータを持たないので match-runtime は使えず、明示的に版を指定する。
+# setuptools<82: mmcv の setup.py が pkg_resources を import するが、82.0 で削除された。
+[tool.uv.extra-build-dependencies]
+mmcv = ["torch==2.0.1", "setuptools<82", "wheel"]
 
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+# CFLAGS: torch 2.0.x の c10/util/strong_type.h が std::is_arithmetic を特殊化しており、
+# Apple clang 21 以降では -Winvalid-specialization がエラーになるため抑止する。
+[tool.uv.extra-build-variables]
+mmcv = { MMCV_WITH_OPS = "1", CFLAGS = "-Wno-invalid-specialization", CXXFLAGS = "-Wno-invalid-specialization" }

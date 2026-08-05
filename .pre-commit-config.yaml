@@ -1,12 +1,12 @@
 minimum_pre_commit_version: 2.9.3
+
 default_language_version:
   # Force all unspecified python hooks to run python3
   python: python3
-  ruby: 2.7.2
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.1.0
+    rev: v6.0.0
     hooks:
       - name: Trim trailing whitespaces
         id: trailing-whitespace
@@ -29,21 +29,25 @@ repos:
       - name: Checks that no unresolved merge conflict are committed
         id: check-merge-conflict
 
-  - repo: https://github.com/google/yapf
-    rev: v0.31.0
+  # yapf and pylint run from the uv-managed project environment rather than from
+  # a pre-commit-managed one: pylint needs the project's imports to resolve, and
+  # this keeps their versions in uv.lock instead of a second place. Requires uv
+  # on PATH, which the Nix dev shell provides.
+  - repo: local
     hooks:
       - name: Format python files with yapf
         id: yapf
-
-  - repo: https://github.com/PyCQA/pylint
-    rev: v2.12.2
-    hooks:
+        entry: uv run --frozen yapf --in-place
+        language: system
+        types: [ python ]
       - name: Lint python files with pylint
         id: pylint
-        args: [ --rcfile=.pylintrc ]
+        entry: uv run --frozen pylint --rcfile=.pylintrc
+        language: system
+        types: [ python ]
 
   - repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: v0.8.0.3
+    rev: v0.11.0.1
     hooks:
       - name: Check shell scripts with shellcheck
         id: shellcheck
