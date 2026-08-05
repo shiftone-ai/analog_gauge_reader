@@ -114,6 +114,30 @@ class WebcamFrameSource:
                 f"Could not read from camera device {self._device_number}")
         return frame
 
+    @property
+    def device_number(self) -> int:
+        return self._device_number
+
+    def switch_to(self, device_number: int) -> None:
+        if device_number == self._device_number:
+            return
+
+        next_capture = cv2.VideoCapture(device_number)
+        if not next_capture.isOpened():
+            next_capture.release()
+            raise RuntimeError(f"Could not open camera device {device_number}")
+
+        success, frame = next_capture.read()
+        if not success or frame is None:
+            next_capture.release()
+            raise RuntimeError(
+                f"Could not read from camera device {device_number}")
+
+        previous_capture = self._capture
+        self._capture = next_capture
+        self._device_number = device_number
+        previous_capture.release()
+
     def release(self) -> None:
         self._capture.release()
 
@@ -360,16 +384,47 @@ def _review_loop(controller: ReviewController, reading: GaugeReading) -> bool:
     return True
 
 
-def run_app(controller: ReviewController) -> None:
+def run_app(controller: ReviewController,
+            camera_source: WebcamFrameSource) -> None:
     cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_NORMAL)
     keep_running = True
+    selecting_camera = False
+    camera_error = None
     while keep_running:
         frame = controller.next_frame()
-        cv2.imshow(WINDOW_NAME,
-                   _draw_footer(frame, "[Space] capture   [Q/Esc] quit"))
+        if selecting_camera:
+            footer = camera_error or (
+                f"Select camera [0-9]   Current: {camera_source.device_number}"
+                "   [Esc] cancel")
+        else:
+            footer = (f"[Space] capture   [C] camera "
+                      f"({camera_source.device_number})   [Q/Esc] quit")
+        cv2.imshow(WINDOW_NAME, _draw_footer(frame, footer))
         key = _read_key(1)
+
+        if selecting_camera:
+            if key in (ord('q'), ord('Q')):
+                break
+            if key == 27:
+                selecting_camera = False
+                camera_error = None
+                continue
+            if ord('0') <= key <= ord('9'):
+                try:
+                    camera_source.switch_to(int(chr(key)))
+                except RuntimeError as error:
+                    camera_error = f"{error}   Select camera [0-9]"
+                else:
+                    selecting_camera = False
+                    camera_error = None
+            continue
+
         if key in (27, ord('q'), ord('Q')):
             break
+        if key in (ord('c'), ord('C')):
+            selecting_camera = True
+            camera_error = None
+            continue
         if key != ord(' '):
             continue
 
@@ -407,7 +462,7 @@ def main(arguments=None) -> int:
                                       reader=reader,
                                       session=session)
         print(f"Session records: {controller.session_path}")
-        run_app(controller)
+        run_app(controller, frame_source)
     except KeyboardInterrupt:
         print("Interrupted", file=sys.stderr)
         return 130
