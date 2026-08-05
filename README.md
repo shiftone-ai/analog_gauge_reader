@@ -4,7 +4,7 @@
 <img src=method_overview.png>
 </p>
 
-This is the code for the paper [Under Pressure: Learning-Based Analog Gauge Reading In The Wild](https://arxiv.org/abs/2404.08785) by Maurits Reitsma, Julian Keller, Kenneth Blomqvist and Roland Siegwart. 
+This is the code for the paper [Under Pressure: Learning-Based Analog Gauge Reading In The Wild](https://arxiv.org/abs/2404.08785) by Maurits Reitsma, Julian Keller, Kenneth Blomqvist and Roland Siegwart.
 
 ## Setup installation (Nix + uv, recommended)
 
@@ -133,6 +133,38 @@ For the input you can either choose an entire folder of images or a single image
 In each such folder the reading is stored inside the `result.json` file. If there is no such reading, one of the pipeline stages failed before a reading could be computed. Best check the log file which is saved inside the run folder, to see where the error came up. There will also be a `error.json` file saved to the image folder, which computes some metrics to check without any labels how good our estimate is.
 
 Additionally if the `debug` flag is set then the plots of all pipeline stages will be added to this folder. If the `eval` flag is set then there will also be a `result_full.json` file created. This file contains the data of the individual stages of the pipeline, which is used when evaluating in the script `full_evaluation.py`.
+
+## Run the Web camera review app
+
+Start a live preview with the default camera and model paths:
+
+```shell
+uv run --no-sync python webcam_app.py
+```
+
+Press Space to capture the displayed frame. After the pipeline finishes, the
+app shows the reading and its final visualization. Press Enter or C to confirm
+the automatic value, E to enter a corrected numeric value, or R to reject the
+reading. Press Q or Escape to close the app. A reading that is still under
+review remains unconfirmed when the app closes.
+
+Use a different camera or output directory, or override any model path, with:
+
+```shell
+uv run --no-sync python webcam_app.py \
+  --camera 1 \
+  --base_path inspection_records \
+  --detection_model models/gauge_detection_model.pt \
+  --key_point_model models/key_point_model.pt \
+  --segmentation_model models/segmentation_model.pt
+```
+
+Each launch creates a timestamped session directory. `events.jsonl` contains
+one append-only record per confirmed, corrected, rejected, or failed capture.
+The original frame and all pipeline outputs are retained in the corresponding
+`shot-NNNN` directory. On macOS, grant camera access to the terminal application
+when prompted; access can be changed later under System Settings > Privacy &
+Security > Camera.
 
 ## Run experiments
 
