@@ -36,6 +36,7 @@ dependencies = [
 dev = [
     "pre-commit>=3.3.3,<4",
     "pylint>=4.0",
+    "pytest>=9.1.1",
     "yapf>=0.43",
 ]
 

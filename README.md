@@ -134,6 +134,38 @@ In each such folder the reading is stored inside the `result.json` file. If ther
 
 Additionally if the `debug` flag is set then the plots of all pipeline stages will be added to this folder. If the `eval` flag is set then there will also be a `result_full.json` file created. This file contains the data of the individual stages of the pipeline, which is used when evaluating in the script `full_evaluation.py`.
 
+## Run the Web camera review app
+
+Start a live preview with the default camera and model paths:
+
+```shell
+uv run --no-sync python webcam_app.py
+```
+
+Press Space to capture the displayed frame. After the pipeline finishes, the
+app shows the reading and its final visualization. Press Enter or C to confirm
+the automatic value, E to enter a corrected numeric value, or R to reject the
+reading. Press Q or Escape to close the app. A reading that is still under
+review remains unconfirmed when the app closes.
+
+Use a different camera or output directory, or override any model path, with:
+
+```shell
+uv run --no-sync python webcam_app.py \
+  --camera 1 \
+  --base_path inspection_records \
+  --detection_model models/gauge_detection_model.pt \
+  --key_point_model models/key_point_model.pt \
+  --segmentation_model models/segmentation_model.pt
+```
+
+Each launch creates a timestamped session directory. `events.jsonl` contains
+one append-only record per confirmed, corrected, rejected, or failed capture.
+The original frame and all pipeline outputs are retained in the corresponding
+`shot-NNNN` directory. On macOS, grant camera access to the terminal application
+when prompted; access can be changed later under System Settings > Privacy &
+Security > Camera.
+
 ## Run experiments
 
 I prepared two scripts to automatically run the pipeline and evaluations on multiple folders with one command. This allows us to easily conduct experiments for images that we group by their characteristics in different folders.
